@@ -1,0 +1,22 @@
+You will find an extract of a dataset on the US census at the following URL. This file is a SQLite database. It contains a single table "census_learn_sql", containing demographical record data. Your goal is to create a small web application to visualise data from this database.
+http://dev.dataiku.com/~cstenac/dev-recruiting/us-...
+
+Functional specifications:
+The application should allow the user to select a column from the database. It should then display, for each value of the chosen column, the count of rows with this value and the average of the column "age" of those rows.
+The values should be sorted by decreasing count.
+You should clip and only keep the first 100 values for a variable.
+Two other metrics should be displayed:
+When there are more than 100 values, it would be nice to know the number of values that were not displayed.
+Even better: know the number of rows that were clipped out.
+Bonus points: If you're extra motivated it would be nice to display a bar chart showing the count of rows of each value and the average age on a popin diplayed while hovering columns.
+
+Design constraints:
+Your application must be a single-page web application, ie the user must be able to change the variable without reloading the page.
+Yet it must have a backend, please do not load the whole database in js!
+Visually, the application should look like the attached picture.
+Try to plan for some extensibility: it should be easy to change the database file and the variables.
+
+Remarks:
+For simplicity, all columns (except the "age" column) are considered as string columns.
+There is no constraint on the technological stack that you might choose to achieve this, either in the backend or frontend. Choose whichever you think is best suited for the task.
+Ideally, please publish your code on Github or Bitbucket (private repositories are free) to share it with me (account: "cunisia" on Github, "pcuni" on Bitbucket). Mail would also work. If you have any issue, don't hesitate to contact me!​

@@ -1,0 +1,55 @@
+<!DOCTYPE HTML > 
+<html>
+	<head>
+		<title> US Census </title> 
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+
+		<link rel="stylesheet" type="text/css" href="/css/style.css">
+		<script src="/js/functions.js"></script>
+		<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+		<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+	</head>
+	<body>
+		<div id="header">
+			U.S. Census
+		</div>
+
+		<div id="display">
+			<br/>
+			Explore the U.S. population datas to find the average age regarding different sorting datas.
+			<br/>
+			<br/>
+			
+			<div id="selector">
+					<% 
+						if( error !== null ){
+					%>
+							The following error occured: <span id="error"><%= error %></span>
+					<% 
+						}
+						else if( columns !== null ){
+					%>
+				<select id='selection' name="row" onchange="newData()">
+					<option value='-1'> </option>
+					<%
+							columns.forEach(function(col){
+					%>
+								<option value='<%= col.id %>'><%= col.name %></option>
+					<%
+							});
+						}
+
+					%>
+				</select>
+				<br/>
+				Hidden values: <span id="hv">-</span>
+				<br/>
+				Clipped rows: <span id="cr">-</span>
+				<br/>
+				<div id="chartContainer" style="height: 370px; width: 100%;"></div>
+			</div>
+		</div>
+		<div id="footer">
+		</div>
+	</body>
+</html>
