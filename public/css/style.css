@@ -33,6 +33,37 @@ body
 	top: 5%;
 	color: #999;
 }
+
 #selector{
+	color: #333;
+}
+
+#hv{
 	color: black;
+	font-size: 30px;
+}
+
+#cr{
+	color: black;
+	font-size: 30px;
+}
+
+#chartContainer{
+	height: 370px;
+	width: 100%;
+}
+
+#tableContainer{
+	height: 370px;
+	width: 100%;
+	text-align: center;
+	overflow-y: scroll;
+}
+
+#tableResults {
+	width: 100%;
+}
+
+.title{
+	font-size: 25px;
 }

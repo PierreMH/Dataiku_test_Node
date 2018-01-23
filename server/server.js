@@ -9,10 +9,14 @@ const MAX_DISPLAYED_VALUES = 100, // Max different values displayed on the chart
 	DB_FILE = './us-census.db',
 	DB_TABLE = 'census_learn_sql';
 
+// Count the numbers of rows in the table.
+var total_count = 0;
+
 app.use(express.static('public'));
 app.use(bodyparser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
+/* Request on the page opening to get the columns names. */
 app.get('/', function (req, res) {
 	var cols = [], i = 0;
 	let db = new sqlite.Database( DB_FILE, sqlite.OPEN_READONLY, (err) => {
@@ -33,17 +37,22 @@ app.get('/', function (req, res) {
 			res.render('index',{ error: null, columns: cols });
 		}
 	});
+	db.all( "SELECT COUNT(1) AS tot FROM " + DB_TABLE, function(err, rows) {
+		if (err) {
+			res.end( JSON.stringify( { error: err.message, result: null } ) );
+		}
+		else{
+			total_count = rows[0].tot;
+		}
+	});
 	db.close();
 });
 
+/* Request when a column name is chosen to get the informations about the column. */
 app.post('/', function (req, res) {
 	var result = [],
-		i = 0, j = 0,
-		data = [],
 		row_count = 0,
-		tmp = undefined,
 		values = 0,
-		found = false,
 		col = '"' + req.body.col + '"';
 	let db = new sqlite.Database(DB_FILE, sqlite.OPEN_READONLY, (err) => {
 		if (err) {
@@ -51,62 +60,22 @@ app.post('/', function (req, res) {
 			return;
 		}
 	});
-	db.all("SELECT age,"+ col +" FROM " + DB_TABLE + "", function(err, rows) { 
+	
+	db.all( "SELECT AVG(age) AS avg_age," + col + " AS name,COUNT(" + col + ") AS count_val FROM " + DB_TABLE + " GROUP BY " + col + "ORDER BY count_val DESC", function(err, rows) {
 		if (err) {
 			res.end( JSON.stringify( { error: err.message, result: null } ) );
 		}
 		else{
-			// Count the number of each different values.
 			rows.forEach(function (row){
-				// Here I remove empty lines.
-				if( row[req.body.col] !== null ){
-					found = false;
-					for( i = 0; i < data.length; i++ ){
-						// If the current value is already stored we add the informations.
-						if( data[i][0] === row[req.body.col] ){
-							data[i][1]++;
-							data[i][2] += row.age;
-							found = true;
-							break;
-						}
-					}
-					// If the value wasn't stored, we create a new data: [ name, count, age sum ]
-					if( !found )
-						data.push( [ row[req.body.col], 0, row.age ] );
-				}
+				if( row.name )
+					result.push({y: row.count_val, label: row.name, age: row.avg_age ? row.avg_age.toFixed(AGE_APPROX) : null });
 			});
-
-			// Sort the array.
-			for( i = 0; i < data.length; i++ ){
-				tmp = undefined;
-				for( j = i; j < data.length; j++ ){
-					if( data[j][1] > data[i][1] ){
-						tmp = data[j];
-						data[j] = data[i];
-						data[i] = tmp;
-					}
-				}
+			while( result.length > MAX_DISPLAYED_VALUES ){
+				values += result[result.length - 1].y;
+				row_count ++;
+				result.pop();
 			}
-
-			// Update information values about the chart.
-			if( data.length > MAX_DISPLAYED_VALUES ){
-				// Keep the MAX_DISPLAYED_VALUES first values.
-				values = data.length - MAX_DISPLAYED_VALUES;
-				for( i = data.length - 1; i >= MAX_DISPLAYED_VALUES; i-- ){
-					row_count += data[i][1];
-					data.pop();
-				}
-			}
-
-			// Count displayed rows.
-			row_count = rows.length - row_count;
-
-			// Create the array usable by the chart.
-			for( i = 0; i < data.length; i++ ){
-				result.push({y: data[i][1], label: data[i][0], age:(data[i][2]/data[i][1]).toFixed(AGE_APPROX)});
-			}	
-			
-			res.end( JSON.stringify( { error: null, result: { row_count: row_count, values: values, datas: result } } ) );
+			res.end( JSON.stringify( { error: null, result: { row_count: total_count - row_count, values: values, datas: result } } ) );
 		}
 	});
 	db.close();
